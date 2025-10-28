@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-hand font-bold text-black">Manage Tindahan</h1>
+            <p class="text-gray-600 font-sans">Register and monitor local businesses for compliance</p>
+        </div>
+        <button 
+            onclick="openTindahanModal()"
+            class="mt-4 sm:mt-0 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base"
+        >
+            <i class="fas fa-plus mr-2"></i>
+            Register Tindahan
+        </button>
+    </div>
+
+    <!-- Tindahan List -->
+    <div class="bg-white border-2 border-black rounded-lg shadow-md">
+        <div class="p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-hand font-bold text-black mb-4">
+                <i class="fas fa-store mr-2 text-black"></i>
+                Registered Businesses
+            </h2>
+            
+            <!-- Loading State -->
+            <div id="loading-tindahan" class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+                <p class="mt-2 text-black font-hand">Loading businesses...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-tindahan" class="text-center py-12 hidden">
+                <i class="fas fa-store text-4xl text-black mb-4"></i>
+                <h3 class="text-lg font-medium text-black mb-2 font-hand">No businesses registered</h3>
+                <p class="text-black font-sans">Register your first business to get started</p>
+            </div>
+
+            <!-- Tindahan Grid -->
+            <div id="tindahan-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
+                <!-- Tindahan cards will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tindahan Modal -->
+<div id="tindahan-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4 py-8">
+        <div class="bg-white border-2 border-black rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-hand font-bold text-black" id="modal-title">Register Tindahan</h3>
+                <button onclick="closeTindahanModal()" class="text-black hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="tindahan-form" class="space-y-3">
+                <div>
+                    <label for="business-name" class="block text-sm font-medium text-black mb-1 font-hand">
+                        Business Name *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="business-name" 
+                        name="business_name"
+                        class="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-sm font-sans"
+                        placeholder="Enter business name..."
+                        required
+                    >
+                </div>
+                
+                <div>
+                    <label for="owner-name" class="block text-sm font-medium text-black mb-1 font-hand">
+                        Owner Name *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="owner-name" 
+                        name="owner_name"
+                        class="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-sm font-sans"
+                        placeholder="Enter owner name..."
+                        required
+                    >
+                </div>
+                
+                <div>
+                    <label for="business-type" class="block text-sm font-medium text-black mb-1 font-hand">
+                        Business Type *
+                    </label>
+                    <select 
+                        id="business-type" 
+                        name="business_type"
+                        class="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-sm font-sans"
+                        required
+                    >
+                        <option value="">Select business type...</option>
+                        <option value="tindahan">Tindahan (Sari-sari Store)</option>
+                        <option value="street_hawker">Street Hawker</option>
+                        <option value="peddler">Peddler</option>
+                        <option value="food_cart">Food Cart</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="business-address" class="block text-sm font-medium text-black mb-1 font-hand">
+                        Address *
+                    </label>
+                    <textarea 
+                        id="business-address" 
+                        name="address"
+                        rows="2"
+                        class="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-sm font-sans"
+                        placeholder="Enter business address..."
+                        required
+                    ></textarea>
+                </div>
+                
+                <div>
+                    <label for="barangay-zone" class="block text-sm font-medium text-black mb-1 font-hand">
+                        Barangay Zone *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="barangay-zone" 
+                        name="barangay_zone"
+                        class="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-sm font-sans"
+                        placeholder="Enter barangay zone..."
+                        required
+                    >
+                </div>
+                
+                <div>
+                    <label for="contact-number" class="block text-sm font-medium text-black mb-1 font-hand">
+                        Contact Number
+                    </label>
+                    <input 
+                        type="tel" 
+                        id="contact-number" 
+                        name="contact_number"
+                        class="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-sm font-sans"
+                        placeholder="Enter contact number..."
+                    >
+                </div>
+                
+                <div>
+                    <label for="permit-number" class="block text-sm font-medium text-black mb-1 font-hand">
+                        Business Permit Number
+                    </label>
+                    <input 
+                        type="text" 
+                        id="permit-number" 
+                        name="business_permit_number"
+                        class="w-full px-3 py-2 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-sm font-sans"
+                        placeholder="Enter permit number..."
+                    >
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-2 pt-3">
+                    <button 
+                        type="submit"
+                        class="flex-1 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-sm"
+                    >
+                        <i class="fas fa-save mr-2"></i>
+                        Register Business
+                    </button>
+                    <button 
+                        type="button"
+                        onclick="closeTindahanModal()"
+                        class="flex-1 bg-white text-black border-2 border-black px-4 py-2 rounded-lg hover:bg-black hover:text-white focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-sm"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// API Client
+class ApiClient {
+    constructor(baseURL = '/api/v1') {
+        this.baseURL = baseURL;
+    }
+
+    async request(endpoint, options = {}) {
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('API request failed:', error);
+            throw error;
+        }
+    }
+
+    async getTindahan() {
+        return this.request('/tindahan');
+    }
+
+    async createTindahan(tindahan) {
+        return this.request('/tindahan', {
+            method: 'POST',
+            body: JSON.stringify(tindahan)
+        });
+    }
+
+    async updateTindahan(id, tindahan) {
+        return this.request(`/tindahan/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(tindahan)
+        });
+    }
+
+    async deleteTindahan(id) {
+        return this.request(`/tindahan/${id}`, {
+            method: 'DELETE'
+        });
+    }
+}
+
+const apiClient = new ApiClient();
+let currentTindahanId = null;
+
+// Load tindahan
+async function loadTindahan() {
+    const loadingEl = document.getElementById('loading-tindahan');
+    const emptyEl = document.getElementById('empty-tindahan');
+    const gridEl = document.getElementById('tindahan-grid');
+    
+    try {
+        const tindahan = await apiClient.getTindahan();
+        
+        loadingEl.classList.add('hidden');
+        
+        if (tindahan.length === 0) {
+            emptyEl.classList.remove('hidden');
+        } else {
+            gridEl.classList.remove('hidden');
+            renderTindahan(tindahan);
+        }
+    } catch (error) {
+        console.error('Failed to load tindahan:', error);
+        loadingEl.classList.add('hidden');
+        emptyEl.classList.remove('hidden');
+    }
+}
+
+// Render tindahan
+function renderTindahan(tindahan) {
+    const gridEl = document.getElementById('tindahan-grid');
+    gridEl.innerHTML = tindahan.map(t => `
+        <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
+                <h3 class="text-lg sm:text-xl font-hand font-bold text-black">${t.business_name}</h3>
+                <span class="px-3 py-1 bg-black text-white text-xs sm:text-sm rounded-full self-start sm:self-auto font-sans">
+                    ${t.compliance_status}
+                </span>
+            </div>
+            
+            <div class="space-y-3">
+                <div class="flex items-center text-black">
+                    <i class="fas fa-user mr-2 text-black"></i>
+                    <span class="font-sans">${t.owner_name}</span>
+                </div>
+                <div class="flex items-center text-black">
+                    <i class="fas fa-store mr-2 text-black"></i>
+                    <span class="font-sans">${t.business_type.replace('_', ' ').toUpperCase()}</span>
+                </div>
+                <div class="flex items-center text-black">
+                    <i class="fas fa-map-marker-alt mr-2 text-black"></i>
+                    <span class="font-sans">${t.address}</span>
+                </div>
+                <div class="flex items-center text-black">
+                    <i class="fas fa-map mr-2 text-black"></i>
+                    <span class="font-sans">Zone: ${t.barangay_zone}</span>
+                </div>
+                ${t.contact_number ? `
+                <div class="flex items-center text-black">
+                    <i class="fas fa-phone mr-2 text-black"></i>
+                    <span class="font-sans">${t.contact_number}</span>
+                </div>
+                ` : ''}
+                ${t.business_permit_number ? `
+                <div class="flex items-center text-black">
+                    <i class="fas fa-id-card mr-2 text-black"></i>
+                    <span class="font-sans">Permit: ${t.business_permit_number}</span>
+                </div>
+                ` : ''}
+            </div>
+            
+            <div class="mt-4 flex gap-2">
+                <button 
+                    onclick="editTindahan(${t.id})"
+                    class="flex-1 bg-white text-black border-2 border-black px-3 py-2 rounded-md hover:bg-black hover:text-white text-sm font-hand"
+                >
+                    Edit
+                </button>
+                <button 
+                    onclick="deleteTindahan(${t.id})"
+                    class="flex-1 bg-black text-white px-3 py-2 rounded-md hover:bg-gray-800 text-sm font-hand"
+                >
+                    Deactivate
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Modal functions
+function openTindahanModal(tindahanId = null) {
+    currentTindahanId = tindahanId;
+    const modal = document.getElementById('tindahan-modal');
+    const title = document.getElementById('modal-title');
+    const form = document.getElementById('tindahan-form');
+    
+    if (tindahanId) {
+        title.textContent = 'Edit Tindahan';
+        // TODO: Load tindahan data for editing
+    } else {
+        title.textContent = 'Register Tindahan';
+        form.reset();
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+function closeTindahanModal() {
+    const modal = document.getElementById('tindahan-modal');
+    modal.classList.add('hidden');
+    currentTindahanId = null;
+}
+
+// Form handling
+document.getElementById('tindahan-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const tindahanData = Object.fromEntries(formData);
+    
+    try {
+        if (currentTindahanId) {
+            await apiClient.updateTindahan(currentTindahanId, tindahanData);
+        } else {
+            await apiClient.createTindahan(tindahanData);
+        }
+        
+        closeTindahanModal();
+        loadTindahan();
+        showSuccessMessage('Tindahan registered successfully!');
+    } catch (error) {
+        showErrorMessage('Failed to register tindahan. Please try again.');
+    }
+});
+
+// Utility functions
+function showSuccessMessage(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function showErrorMessage(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Load tindahan when page loads
+document.addEventListener('DOMContentLoaded', loadTindahan);
+</script>
+{% endblock %}

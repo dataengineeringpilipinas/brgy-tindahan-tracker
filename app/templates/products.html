@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-hand font-bold text-black">Manage Products</h1>
+            <p class="text-gray-600 font-sans">Maintain your product catalog</p>
+        </div>
+        <button 
+            onclick="openProductModal()"
+            class="mt-4 sm:mt-0 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base"
+        >
+            <i class="fas fa-plus mr-2"></i>
+            Add Product
+        </button>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <input 
+                    type="text" 
+                    id="search-input"
+                    placeholder="Search products..."
+                    class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                >
+            </div>
+            <div>
+                <select 
+                    id="category-filter"
+                    class="px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent font-sans"
+                >
+                    <option value="">All Categories</option>
+                    <option value="food">Food</option>
+                    <option value="beverages">Beverages</option>
+                    <option value="household">Household</option>
+                    <option value="personal-care">Personal Care</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products List -->
+    <div class="bg-white border-2 border-black rounded-lg shadow-md">
+        <div class="p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-hand font-bold text-black mb-4">
+                <i class="fas fa-box mr-2 text-black"></i>
+                Product Catalog
+            </h2>
+            
+            <!-- Loading State -->
+            <div id="loading-products" class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+                <p class="mt-2 text-black font-hand">Loading products...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-products" class="text-center py-12 hidden">
+                <i class="fas fa-box text-4xl text-black mb-4"></i>
+                <h3 class="text-lg font-medium text-black mb-2 font-hand">No products found</h3>
+                <p class="text-black font-sans">Add your first product to get started</p>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
+                <!-- Product cards will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Modal -->
+<div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white border-2 border-black rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-hand font-bold text-black" id="modal-title">Add Product</h3>
+                <button onclick="closeProductModal()" class="text-black hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="product-form" class="space-y-4">
+                <div>
+                    <label for="product-name" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Product Name *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="product-name" 
+                        name="name"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                        placeholder="Enter product name..."
+                        required
+                    >
+                </div>
+                
+                <div>
+                    <label for="product-description" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Description
+                    </label>
+                    <textarea 
+                        id="product-description" 
+                        name="description"
+                        rows="3"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                        placeholder="Enter product description..."
+                    ></textarea>
+                </div>
+                
+                <div>
+                    <label for="product-category" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Category *
+                    </label>
+                    <select 
+                        id="product-category" 
+                        name="category"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent font-sans"
+                        required
+                    >
+                        <option value="">Select category...</option>
+                        <option value="food">Food</option>
+                        <option value="beverages">Beverages</option>
+                        <option value="household">Household</option>
+                        <option value="personal-care">Personal Care</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="product-unit" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Unit *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="product-unit" 
+                        name="unit"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                        placeholder="e.g., pcs, kg, liter..."
+                        required
+                    >
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                    <button 
+                        type="submit"
+                        class="flex-1 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base"
+                    >
+                        <i class="fas fa-save mr-2"></i>
+                        Save Product
+                    </button>
+                    <button 
+                        type="button"
+                        onclick="closeProductModal()"
+                        class="flex-1 bg-white text-black border-2 border-black px-6 py-3 rounded-lg hover:bg-black hover:text-white focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// API Client (reuse from stores)
+class ApiClient {
+    constructor(baseURL = '/api/v1') {
+        this.baseURL = baseURL;
+    }
+
+    async request(endpoint, options = {}) {
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('API request failed:', error);
+            throw error;
+        }
+    }
+
+    async getProducts(category = null, search = null) {
+        let url = '/products';
+        const params = new URLSearchParams();
+        if (category) params.append('category', category);
+        if (search) params.append('search', search);
+        if (params.toString()) url += '?' + params.toString();
+        
+        return this.request(url);
+    }
+
+    async createProduct(product) {
+        return this.request('/products', {
+            method: 'POST',
+            body: JSON.stringify(product)
+        });
+    }
+
+    async updateProduct(id, product) {
+        return this.request(`/products/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(product)
+        });
+    }
+
+    async deleteProduct(id) {
+        return this.request(`/products/${id}`, {
+            method: 'DELETE'
+        });
+    }
+}
+
+const apiClient = new ApiClient();
+let currentProductId = null;
+
+// Load products
+async function loadProducts() {
+    const loadingEl = document.getElementById('loading-products');
+    const emptyEl = document.getElementById('empty-products');
+    const gridEl = document.getElementById('products-grid');
+    
+    try {
+        const category = document.getElementById('category-filter').value;
+        const search = document.getElementById('search-input').value;
+        
+        const products = await apiClient.getProducts(category, search);
+        
+        loadingEl.classList.add('hidden');
+        
+        if (products.length === 0) {
+            emptyEl.classList.remove('hidden');
+        } else {
+            gridEl.classList.remove('hidden');
+            renderProducts(products);
+        }
+    } catch (error) {
+        console.error('Failed to load products:', error);
+        loadingEl.classList.add('hidden');
+        emptyEl.classList.remove('hidden');
+    }
+}
+
+// Render products
+function renderProducts(products) {
+    const gridEl = document.getElementById('products-grid');
+    gridEl.innerHTML = products.map(product => `
+        <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
+                <h3 class="text-lg sm:text-xl font-hand font-bold text-black">${product.name}</h3>
+                <span class="px-3 py-1 bg-black text-white text-xs sm:text-sm rounded-full self-start sm:self-auto font-sans">
+                    ${product.category}
+                </span>
+            </div>
+            
+            <div class="space-y-3">
+                ${product.description ? `
+                <div class="flex items-start text-black">
+                    <i class="fas fa-info-circle mr-2 text-black mt-1"></i>
+                    <span class="font-sans text-sm">${product.description}</span>
+                </div>
+                ` : ''}
+                <div class="flex items-center text-black">
+                    <i class="fas fa-ruler mr-2 text-black"></i>
+                    <span class="font-sans">Unit: ${product.unit}</span>
+                </div>
+            </div>
+            
+            <div class="mt-4 flex gap-2">
+                <button 
+                    onclick="editProduct(${product.id})"
+                    class="flex-1 bg-white text-black border-2 border-black px-3 py-2 rounded-md hover:bg-black hover:text-white text-sm font-hand"
+                >
+                    Edit
+                </button>
+                <button 
+                    onclick="deleteProduct(${product.id})"
+                    class="flex-1 bg-black text-white px-3 py-2 rounded-md hover:bg-gray-800 text-sm font-hand"
+                >
+                    Delete
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Modal functions
+function openProductModal(productId = null) {
+    currentProductId = productId;
+    const modal = document.getElementById('product-modal');
+    const title = document.getElementById('modal-title');
+    const form = document.getElementById('product-form');
+    
+    if (productId) {
+        title.textContent = 'Edit Product';
+        // TODO: Load product data for editing
+    } else {
+        title.textContent = 'Add Product';
+        form.reset();
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+function closeProductModal() {
+    const modal = document.getElementById('product-modal');
+    modal.classList.add('hidden');
+    currentProductId = null;
+}
+
+// Form handling
+document.getElementById('product-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const productData = Object.fromEntries(formData);
+    
+    try {
+        if (currentProductId) {
+            await apiClient.updateProduct(currentProductId, productData);
+        } else {
+            await apiClient.createProduct(productData);
+        }
+        
+        closeProductModal();
+        loadProducts();
+        showSuccessMessage('Product saved successfully!');
+    } catch (error) {
+        showErrorMessage('Failed to save product. Please try again.');
+    }
+});
+
+// Search and filter
+document.getElementById('search-input').addEventListener('input', debounce(loadProducts, 300));
+document.getElementById('category-filter').addEventListener('change', loadProducts);
+
+// Utility functions
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function showSuccessMessage(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function showErrorMessage(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Load products when page loads
+document.addEventListener('DOMContentLoaded', loadProducts);
+</script>
+{% endblock %}

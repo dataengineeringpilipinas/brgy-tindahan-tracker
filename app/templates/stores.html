@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-hand font-bold text-black">Manage Stores</h1>
+            <p class="text-gray-600 font-sans">Register and manage local stores in your barangay</p>
+        </div>
+        <button 
+            onclick="openStoreModal()"
+            class="mt-4 sm:mt-0 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base"
+        >
+            <i class="fas fa-plus mr-2"></i>
+            Add Store
+        </button>
+    </div>
+
+    <!-- Stores List -->
+    <div class="bg-white border-2 border-black rounded-lg shadow-md">
+        <div class="p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-hand font-bold text-black mb-4">
+                <i class="fas fa-store mr-2 text-black"></i>
+                Registered Stores
+            </h2>
+            
+            <!-- Loading State -->
+            <div id="loading-stores" class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+                <p class="mt-2 text-black font-hand">Loading stores...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-stores" class="text-center py-12 hidden">
+                <i class="fas fa-store text-4xl text-black mb-4"></i>
+                <h3 class="text-lg font-medium text-black mb-2 font-hand">No stores found</h3>
+                <p class="text-black font-sans">Add your first store to get started</p>
+            </div>
+
+            <!-- Stores Grid -->
+            <div id="stores-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
+                <!-- Store cards will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Store Modal -->
+<div id="store-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white border-2 border-black rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-hand font-bold text-black" id="modal-title">Add Store</h3>
+                <button onclick="closeStoreModal()" class="text-black hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="store-form" class="space-y-4">
+                <div>
+                    <label for="store-name" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Store Name *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="store-name" 
+                        name="name"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                        placeholder="Enter store name..."
+                        required
+                    >
+                </div>
+                
+                <div>
+                    <label for="owner-name" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Owner Name *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="owner-name" 
+                        name="owner_name"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                        placeholder="Enter owner name..."
+                        required
+                    >
+                </div>
+                
+                <div>
+                    <label for="store-address" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Address *
+                    </label>
+                    <textarea 
+                        id="store-address" 
+                        name="address"
+                        rows="3"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                        placeholder="Enter store address..."
+                        required
+                    ></textarea>
+                </div>
+                
+                <div>
+                    <label for="contact-number" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Contact Number
+                    </label>
+                    <input 
+                        type="tel" 
+                        id="contact-number" 
+                        name="contact_number"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                        placeholder="Enter contact number..."
+                    >
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                    <button 
+                        type="submit"
+                        class="flex-1 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base"
+                    >
+                        <i class="fas fa-save mr-2"></i>
+                        Save Store
+                    </button>
+                    <button 
+                        type="button"
+                        onclick="closeStoreModal()"
+                        class="flex-1 bg-white text-black border-2 border-black px-6 py-3 rounded-lg hover:bg-black hover:text-white focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// API Client
+class ApiClient {
+    constructor(baseURL = '/api/v1') {
+        this.baseURL = baseURL;
+    }
+
+    async request(endpoint, options = {}) {
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('API request failed:', error);
+            throw error;
+        }
+    }
+
+    async getStores() {
+        return this.request('/stores');
+    }
+
+    async createStore(store) {
+        return this.request('/stores', {
+            method: 'POST',
+            body: JSON.stringify(store)
+        });
+    }
+
+    async updateStore(id, store) {
+        return this.request(`/stores/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(store)
+        });
+    }
+
+    async deleteStore(id) {
+        return this.request(`/stores/${id}`, {
+            method: 'DELETE'
+        });
+    }
+}
+
+const apiClient = new ApiClient();
+let currentStoreId = null;
+
+// Load stores
+async function loadStores() {
+    const loadingEl = document.getElementById('loading-stores');
+    const emptyEl = document.getElementById('empty-stores');
+    const gridEl = document.getElementById('stores-grid');
+    
+    try {
+        const stores = await apiClient.getStores();
+        
+        loadingEl.classList.add('hidden');
+        
+        if (stores.length === 0) {
+            emptyEl.classList.remove('hidden');
+        } else {
+            gridEl.classList.remove('hidden');
+            renderStores(stores);
+        }
+    } catch (error) {
+        console.error('Failed to load stores:', error);
+        loadingEl.classList.add('hidden');
+        emptyEl.classList.remove('hidden');
+    }
+}
+
+// Render stores
+function renderStores(stores) {
+    const gridEl = document.getElementById('stores-grid');
+    gridEl.innerHTML = stores.map(store => `
+        <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
+                <h3 class="text-lg sm:text-xl font-hand font-bold text-black">${store.name}</h3>
+                <span class="px-3 py-1 bg-black text-white text-xs sm:text-sm rounded-full self-start sm:self-auto font-sans">
+                    ${store.is_active ? 'Active' : 'Inactive'}
+                </span>
+            </div>
+            
+            <div class="space-y-3">
+                <div class="flex items-center text-black">
+                    <i class="fas fa-user mr-2 text-black"></i>
+                    <span class="font-sans">${store.owner_name}</span>
+                </div>
+                <div class="flex items-center text-black">
+                    <i class="fas fa-map-marker-alt mr-2 text-black"></i>
+                    <span class="font-sans">${store.address}</span>
+                </div>
+                ${store.contact_number ? `
+                <div class="flex items-center text-black">
+                    <i class="fas fa-phone mr-2 text-black"></i>
+                    <span class="font-sans">${store.contact_number}</span>
+                </div>
+                ` : ''}
+            </div>
+            
+            <div class="mt-4 flex gap-2">
+                <button 
+                    onclick="editStore(${store.id})"
+                    class="flex-1 bg-white text-black border-2 border-black px-3 py-2 rounded-md hover:bg-black hover:text-white text-sm font-hand"
+                >
+                    Edit
+                </button>
+                <button 
+                    onclick="deleteStore(${store.id})"
+                    class="flex-1 bg-black text-white px-3 py-2 rounded-md hover:bg-gray-800 text-sm font-hand"
+                >
+                    Delete
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Modal functions
+function openStoreModal(storeId = null) {
+    currentStoreId = storeId;
+    const modal = document.getElementById('store-modal');
+    const title = document.getElementById('modal-title');
+    const form = document.getElementById('store-form');
+    
+    if (storeId) {
+        title.textContent = 'Edit Store';
+        // TODO: Load store data for editing
+    } else {
+        title.textContent = 'Add Store';
+        form.reset();
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+function closeStoreModal() {
+    const modal = document.getElementById('store-modal');
+    modal.classList.add('hidden');
+    currentStoreId = null;
+}
+
+// Form handling
+document.getElementById('store-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const storeData = Object.fromEntries(formData);
+    
+    try {
+        if (currentStoreId) {
+            await apiClient.updateStore(currentStoreId, storeData);
+        } else {
+            await apiClient.createStore(storeData);
+        }
+        
+        closeStoreModal();
+        loadStores();
+        showSuccessMessage('Store saved successfully!');
+    } catch (error) {
+        showErrorMessage('Failed to save store. Please try again.');
+    }
+});
+
+// Utility functions
+function showSuccessMessage(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function showErrorMessage(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Load stores when page loads
+document.addEventListener('DOMContentLoaded', loadStores);
+</script>
+{% endblock %}

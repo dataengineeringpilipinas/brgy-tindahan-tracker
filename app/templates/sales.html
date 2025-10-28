@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-hand font-bold text-black">Sales Tracking</h1>
+            <p class="text-gray-600 font-sans">Track sales and generate reports</p>
+        </div>
+        <button 
+            onclick="openSaleModal()"
+            class="mt-4 sm:mt-0 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base"
+        >
+            <i class="fas fa-plus mr-2"></i>
+            Record Sale
+        </button>
+    </div>
+
+    <!-- Sales Summary -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 text-center">
+            <div class="text-2xl font-bold text-black font-hand" id="today-sales">₱0</div>
+            <div class="text-gray-600 font-sans">Today's Sales</div>
+        </div>
+        <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 text-center">
+            <div class="text-2xl font-bold text-black font-hand" id="week-sales">₱0</div>
+            <div class="text-gray-600 font-sans">This Week</div>
+        </div>
+        <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 text-center">
+            <div class="text-2xl font-bold text-black font-hand" id="month-sales">₱0</div>
+            <div class="text-gray-600 font-sans">This Month</div>
+        </div>
+        <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 text-center">
+            <div class="text-2xl font-bold text-black font-hand" id="total-transactions">0</div>
+            <div class="text-gray-600 font-sans">Total Transactions</div>
+        </div>
+    </div>
+
+    <!-- Sales List -->
+    <div class="bg-white border-2 border-black rounded-lg shadow-md">
+        <div class="p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-hand font-bold text-black mb-4">
+                <i class="fas fa-chart-line mr-2 text-black"></i>
+                Recent Sales
+            </h2>
+            
+            <!-- Loading State -->
+            <div id="loading-sales" class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+                <p class="mt-2 text-black font-hand">Loading sales...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-sales" class="text-center py-12 hidden">
+                <i class="fas fa-chart-line text-4xl text-black mb-4"></i>
+                <h3 class="text-lg font-medium text-black mb-2 font-hand">No sales found</h3>
+                <p class="text-black font-sans">Record your first sale to get started</p>
+            </div>
+
+            <!-- Sales Table -->
+            <div id="sales-table" class="hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-sans">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-sans">Store</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-sans">Product</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-sans">Quantity</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-sans">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-sans">Customer</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sales-tbody" class="bg-white divide-y divide-gray-200">
+                            <!-- Sales rows will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sale Modal -->
+<div id="sale-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white border-2 border-black rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-hand font-bold text-black" id="modal-title">Record Sale</h3>
+                <button onclick="closeSaleModal()" class="text-black hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="sale-form" class="space-y-4">
+                <div>
+                    <label for="sale-store" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Store *
+                    </label>
+                    <select 
+                        id="sale-store" 
+                        name="store_id"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent font-sans"
+                        required
+                    >
+                        <option value="">Select store...</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="sale-product" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Product *
+                    </label>
+                    <select 
+                        id="sale-product" 
+                        name="product_id"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent font-sans"
+                        required
+                    >
+                        <option value="">Select product...</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="sale-quantity" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Quantity *
+                    </label>
+                    <input 
+                        type="number" 
+                        id="sale-quantity" 
+                        name="quantity_sold"
+                        min="1"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                        placeholder="Enter quantity sold..."
+                        required
+                    >
+                </div>
+                
+                <div>
+                    <label for="sale-price" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Unit Price *
+                    </label>
+                    <input 
+                        type="number" 
+                        id="sale-price" 
+                        name="unit_price"
+                        step="0.01"
+                        min="0"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                        placeholder="Enter unit price..."
+                        required
+                    >
+                </div>
+                
+                <div>
+                    <label for="customer-name" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Customer Name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="customer-name" 
+                        name="customer_name"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                        placeholder="Enter customer name..."
+                    >
+                </div>
+                
+                <div>
+                    <label for="sale-notes" class="block text-sm font-medium text-black mb-2 font-hand">
+                        Notes
+                    </label>
+                    <textarea 
+                        id="sale-notes" 
+                        name="notes"
+                        rows="3"
+                        class="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-base font-sans"
+                        placeholder="Enter additional notes..."
+                    ></textarea>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                    <button 
+                        type="submit"
+                        class="flex-1 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base"
+                    >
+                        <i class="fas fa-save mr-2"></i>
+                        Record Sale
+                    </button>
+                    <button 
+                        type="button"
+                        onclick="closeSaleModal()"
+                        class="flex-1 bg-white text-black border-2 border-black px-6 py-3 rounded-lg hover:bg-black hover:text-white focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Placeholder for sales functionality
+// This would be implemented similar to stores and products
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize sales page
+    console.log('Sales page loaded');
+});
+</script>
+{% endblock %}

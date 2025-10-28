@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-hand font-bold text-black mb-4">
+                Barangay Tindahan Compliance Tracker
+            </h1>
+            <p class="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 font-sans">
+                Monitor and enforce compliance of local tindahan, street hawkers, and peddlers for barangay regulatory enforcement
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/tindahan" class="bg-black text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base sm:text-lg">
+                    <i class="fas fa-store mr-2"></i>
+                    Manage Tindahan
+                </a>
+                <a href="/inspections" class="bg-white text-black border-2 border-black px-6 sm:px-8 py-3 rounded-lg hover:bg-black hover:text-white focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors duration-200 font-hand font-bold text-base sm:text-lg">
+                    <i class="fas fa-clipboard-check mr-2"></i>
+                    Schedule Inspections
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-2xl sm:text-3xl font-hand font-bold text-black mb-4">
+                Compliance Monitoring Features
+            </h2>
+            <p class="text-gray-600 font-sans">
+                Comprehensive tools for barangay officials to monitor and enforce local business regulations
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Tindahan Registration -->
+            <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow duration-200">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
+                    <h3 class="text-lg sm:text-xl font-hand font-bold text-black">Tindahan Registration</h3>
+                    <i class="fas fa-store text-2xl text-black"></i>
+                </div>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed font-sans">
+                    Register and track all tindahan, street hawkers, and peddlers in your barangay
+                </p>
+            </div>
+
+            <!-- Compliance Inspections -->
+            <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow duration-200">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
+                    <h3 class="text-lg sm:text-xl font-hand font-bold text-black">Compliance Inspections</h3>
+                    <i class="fas fa-clipboard-check text-2xl text-black"></i>
+                </div>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed font-sans">
+                    Schedule and conduct regular compliance inspections
+                </p>
+            </div>
+
+            <!-- Violation Tracking -->
+            <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow duration-200">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
+                    <h3 class="text-lg sm:text-xl font-hand font-bold text-black">Violation Tracking</h3>
+                    <i class="fas fa-exclamation-triangle text-2xl text-black"></i>
+                </div>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed font-sans">
+                    Track violations and monitor resolution progress
+                </p>
+            </div>
+
+            <!-- Compliance Reports -->
+            <div class="bg-white border-2 border-black rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow duration-200">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
+                    <h3 class="text-lg sm:text-xl font-hand font-bold text-black">Compliance Reports</h3>
+                    <i class="fas fa-chart-bar text-2xl text-black"></i>
+                </div>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed font-sans">
+                    Generate comprehensive compliance reports and analytics
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats Section -->
+<div class="bg-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-2xl sm:text-3xl font-hand font-bold text-black mb-4">
+                Compliance Dashboard
+            </h2>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="text-3xl sm:text-4xl font-bold text-black font-hand mb-2" id="total-tindahan">0</div>
+                <div class="text-gray-600 font-sans">Total Tindahan</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl sm:text-4xl font-bold text-green-600 font-hand mb-2" id="compliant-tindahan">0</div>
+                <div class="text-gray-600 font-sans">Compliant</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl sm:text-4xl font-bold text-red-600 font-hand mb-2" id="violations">0</div>
+                <div class="text-gray-600 font-sans">Active Violations</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl sm:text-4xl font-bold text-yellow-600 font-hand mb-2" id="expired-permits">0</div>
+                <div class="text-gray-600 font-sans">Expired Permits</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// API Client
+class ApiClient {
+    constructor(baseURL = '/api/v1') {
+        this.baseURL = baseURL;
+    }
+
+    async request(endpoint, options = {}) {
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('API request failed:', error);
+            throw error;
+        }
+    }
+
+    async getTindahan() {
+        return this.request('/tindahan');
+    }
+
+    async getComplianceMetrics() {
+        return this.request('/compliance/metrics');
+    }
+}
+
+// Load dashboard data
+async function loadDashboardData() {
+    const apiClient = new ApiClient();
+    
+    try {
+        const [tindahan, metrics] = await Promise.all([
+            apiClient.getTindahan(),
+            apiClient.getComplianceMetrics()
+        ]);
+
+        document.getElementById('total-tindahan').textContent = tindahan.length;
+        
+        if (metrics) {
+            document.getElementById('compliant-tindahan').textContent = metrics.compliant_tindahan || 0;
+            document.getElementById('violations').textContent = metrics.total_violations || 0;
+            document.getElementById('expired-permits').textContent = metrics.expired_permits || 0;
+        } else {
+            // Fallback if metrics endpoint not available yet
+            document.getElementById('compliant-tindahan').textContent = '0';
+            document.getElementById('violations').textContent = '0';
+            document.getElementById('expired-permits').textContent = '0';
+        }
+    } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+    }
+}
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', loadDashboardData);
+</script>
+{% endblock %}

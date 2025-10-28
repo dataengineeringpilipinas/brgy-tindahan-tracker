@@ -1,0 +1,27 @@
+# Fly.io configuration for Barangay Tindahan Tracker
+# A Vibecamp Creation
+
+app = "brgy-tindahan-tracker"
+primary_region = "sin"  # Singapore region for Philippines
+
+[build]
+
+[env]
+  DATABASE_URL = "sqlite+aiosqlite:///./brgy_tindahan.db"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
+
+[mounts]
+  source = "data"
+  destination = "/data"
